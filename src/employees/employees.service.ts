@@ -1,54 +1,77 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Employee } from './employees.interface';
-import { Model } from 'mongoose';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Employee } from './employees.interface'
+import { Model } from 'mongoose'
 import { PaginatedEmployeeResult } from './dto/paginated-employee.dto'
-import { CreateEmployeeDto } from './dto/create-employee.dto';
-import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { CreateEmployeeDto } from './dto/create-employee.dto'
+import { UpdateEmployeeDto } from './dto/update-employee.dto'
+
 @Injectable()
 export class EmployeesService {
-
   constructor(@InjectModel('Employee') private readonly employeeModel: Model<Employee>){}
   
+  async findAllEmployees(limit: number , offset: number): Promise<PaginatedEmployeeResult> {
+    try {
+      const total = await this.employeeModel.countDocuments({ isDeleted: false });
+      const employees = await this.employeeModel.find({ isDeleted: false }).skip(offset).limit(limit).exec()
+      const totalPages = Math.ceil(total / limit)
 
-  async findAllEmployees(limit: number, offset: number): Promise<PaginatedEmployeeResult> {
-    const total = await this.employeeModel.countDocuments({ isDeleted: false })
-    const employees = await this.employeeModel.find({ isDeleted: false }).skip(offset).limit(limit).exec()
-    const totalPages = Math.ceil(total / limit)
-
-    return {
-    data: employees,
-    limit,
-    offset,
-    total,
-    totalPages,
-    }
-}
-
-  async findAllDeleted( limit : number, offset : number ):Promise<PaginatedEmployeeResult>{
-    const total = await this.employeeModel.countDocuments({ isDeleted: true })
-    const employees = await this.employeeModel.find({ isDeleted: true }).skip(offset).limit(limit).exec()
-    const totalPages = Math.ceil(total / limit)
-
-    return {
-    data: employees,
-    limit,
-    offset,
-    total,
-    totalPages,
+      return { data: employees, limit, offset, total, totalPages }
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching all employees')
     }
   }
 
-  async deactivateEmployee (id:string): Promise<Employee>{
-    return this.employeeModel.findByIdAndUpdate(id, {isDeleted: true})
+  async findAllDeleted(limit: number, offset: number): Promise<PaginatedEmployeeResult>{
+    try {
+      const total = await this.employeeModel.countDocuments({ isDeleted: true })
+      const employees = await this.employeeModel.find({ isDeleted: true }).skip(offset).limit(limit).exec()
+      const totalPages = Math.ceil(total / limit)
+
+      return { data: employees, limit, offset, total, totalPages }
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching deleted employees')
+    }
   }
 
-  async addEmployee(createEmployeeDto: CreateEmployeeDto): Promise<Employee>{
-    const newEmployee = new this.employeeModel(createEmployeeDto)
-    return newEmployee.save()
+  async deactivateEmployee(id: string): Promise<Employee> {
+    try {
+      const employee = await this.employeeModel.findById(id)
+      if (!employee) {
+        throw new NotFoundException(`Employee with ID ${id} not found`)
+      }
+
+      employee.isDeleted = true
+      return await employee.save()
+    } catch (error) {
+      if (error.status === 404) {
+        throw error
+      }
+      throw new InternalServerErrorException(`Error deactivating employee with ID ${id}`)
+    }
   }
 
-  async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee>{
-    return this.employeeModel.findByIdAndUpdate(id, updateEmployeeDto, { new: true }).exec();
+  async addEmployee(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
+    try {
+      const newEmployee = new this.employeeModel(createEmployeeDto)
+      return await newEmployee.save()
+    } catch (error) {
+      throw new InternalServerErrorException('Error adding new employee')
+    }
+  }
+
+  async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
+    try {
+      const updatedEmployee = await this.employeeModel.findByIdAndUpdate(id, updateEmployeeDto, { new: true }).exec()
+      if (!updatedEmployee) {
+        throw new NotFoundException(`Employee with ID ${id} not found`)
+      }
+      return updatedEmployee
+    } catch (error) {
+      if (error.status === 404) {
+        throw error
+      }
+      throw new InternalServerErrorException(`Error updating employee with ID ${id}`)
+    }
   }
 }
