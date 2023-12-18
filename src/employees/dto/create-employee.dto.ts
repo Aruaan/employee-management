@@ -24,3 +24,4 @@ export class CreateEmployeeDto {
   @ApiProperty()
   readonly dateOfBirth: Date;
 }
+

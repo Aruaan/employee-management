@@ -2,8 +2,9 @@ import { Employee } from "../employees.interface";
 
 export class PaginatedEmployeeResult {
   data: Employee[];
-  page: number;
   limit: number;
+
+  offset: number;
   total: number;
   totalPages: number;
 }
