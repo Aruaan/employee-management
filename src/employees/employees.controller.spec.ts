@@ -12,7 +12,7 @@ describe('EmployeesController', () => {
  let service: EmployeesService
  const mockEmployeesService = {
   findAllEmployees: jest.fn(),
-  findAllDeleted: jest.fn(),
+  findAllDeactivated: jest.fn(),
   deactivateEmployee: jest.fn(),
   updateEmployee: jest.fn(),
   addEmployee: jest.fn()
@@ -45,7 +45,7 @@ describe('EmployeesController', () => {
    service = module.get<EmployeesService>(EmployeesService)
 
  });
-
+ 
  it('should return a paginated list of all non-deleted employees', async () => {
     const result: PaginatedEmployeeResult = {
       data: [], limit: 10, offset: 0, total: 0, totalPages: 0
@@ -58,10 +58,10 @@ describe('EmployeesController', () => {
     const result: PaginatedEmployeeResult = {
       data: [], limit: 10, offset: 0, total: 0, totalPages: 0
     }
-    jest.spyOn(service, 'findAllDeleted').mockImplementation(async () => result)
-    expect(await controller.findAllDeleted(10, 0)).toBe(result)
+    jest.spyOn(service, 'findAllDeactivated').mockImplementation(async () => result)
+    expect(await controller.findAllDeactivated(10, 0)).toBe(result)
  })
-
+ 
  it('should create and return a new employee', async () => {
   const createDto = new CreateEmployeeDto();
 
@@ -76,7 +76,7 @@ describe('EmployeesController', () => {
 
   expect (await controller.deactivate('1')).toBe(mockEmployee)
  })
-
+ 
  it('should update and return an employee', async () => {
 
   const updatedMockEmployee = {...mockEmployee, email: 'mladen.updated@example.com'}
@@ -90,6 +90,11 @@ describe('EmployeesController', () => {
  it('should throw BadRequestException if offset is negative', async () => {
    await expect(controller.findAll(10, -1)).rejects.toThrow(BadRequestException)
  });
- 
 
-});
+ 
+ it('should throw BadRequestException if both limit and offset are negative', 
+  async () => {
+    await expect(controller.findAll(-1, -1)).rejects.toThrow(BadRequestException)
+ })
+
+})

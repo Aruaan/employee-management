@@ -8,13 +8,14 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   const config = new DocumentBuilder()
-    .setTitle('Employee Database API')
-    .setDescription('The API description')
+    .setTitle('Employee Management API')
+    .setDescription('An API for managing employee records.')
     .setVersion('1.0')
+    .addTag('employee', 'Operations about the employees')
     .build();
     
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document);  
 
   await app.listen(3000);
 }

@@ -1,7 +1,9 @@
 import { IsDateString, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from "@nestjs/class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-
+/**
+ * Data Transfer Object for home address details of an employee.
+ */
 class HomeAddressDto {
   @IsString()
   @IsNotEmpty()
@@ -19,7 +21,9 @@ class HomeAddressDto {
   @IsOptional()
   addressLine2?: string;
 }
-
+/**
+ * Data Transfer Object for creating a new employee.
+ */
 export class CreateEmployeeDto {
   @ApiProperty()
   @IsString()

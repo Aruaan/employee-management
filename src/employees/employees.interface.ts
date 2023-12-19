@@ -1,5 +1,6 @@
 import { Document } from "mongoose";
 
+//Represents an Employee document in the database.
 export interface Employee extends Document {
   name: string;
   email: string;
