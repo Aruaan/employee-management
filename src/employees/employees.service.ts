@@ -66,6 +66,11 @@ export class EmployeesService {
 
     // Update an employee by ID
     async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
+    const allowedFields = ['name', 'email', 'phoneNumber', 'homeAddress', 'dateOfEmployment', 'dateOfBirth']
+    const hasInvalidField = Object.keys(updateEmployeeDto).some(field => !allowedFields.includes(field))
+    if (hasInvalidField) {
+      throw new InternalServerErrorException('Invalid field in update data');
+    }
     try {
       const updatedEmployee = await this.employeeModel.findByIdAndUpdate(id, updateEmployeeDto, { new: true }).exec()
       if (!updatedEmployee) {

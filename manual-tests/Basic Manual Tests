@@ -1,74 +1,68 @@
 Basic Manual Tests
 
-Test: AddEmployee
-
-Description: Validates that the 'addEmployee' method successfully adds a new employee to the database.
+Test: adding an employee stores it in the database
 
 Steps:
 
-Input valid 'CreateEmployeeDto' data.
-Ensure the new employee doesn't already exist.
-Send a 'POST' request to /employees with 'CreateEmployeeDto'.
-Check if the employee has been added by sending a 'GET' request to the same endpoint.
+1. Ensure the new employee doesn't already exist.
+2. Send a 'POST' request to /employees with valid employee data.
+3. Check if the employee has been added by sending a 'GET' request to the same endpoint.
+
 Expected Result:
 
 HTTP response: 201 (Created).
 Response contains details of the new employee.
 
-Test: FindAll
-
-Description: Validates that the 'findAll' Method returns a paginated list of all employees with the default limit and offset values.
+Test: adding an employee with no required data fails
 
 Steps:
-
-If there are employees in the database, send a 'GET' request to the /employees endpoint without query parameters.
-Check if the employees returned are in the correct order.
+1. Send a 'POST' request to the /employees enpoint with employee data not containing one or more required employee data fields
 
 Expected result:
 
-HTTP response: 200 (OK)
-The response contains a list of employees and their number does not exceed the limit (10) and start from the first employee (offset 0)
+HTTP response: 500
 
-
-Test FindDeactivated
-
-Description: Validates that the 'findDeactivated' method returns a paginated list of all deactivated employees with the default limit and offset values.
+Test pagination works for 'all employees' request
 
 Steps:
 
-If there are deactivated employees in the database, send a 'GET' request to the /employees/deactivated endpoint without query parameters.
-Check if the employees returned are actually deactivated.
+1. Ensure the database has 7 employees added.
+2. Send a 'GET' request to the /employees endpoint with default limit(10) and offset(0) values.
+3. Verify that the response contains all 7 employees.
+4. Send a 'GET' request to the /employees endpoint with limit=5 and default offset value.
+5. Verify that the response contains 5 employees and 2 total pages.
+6. Send a 'GET' request to the /employees endpoint with limit=5 and offset=2.
+7. Verify that the response contains 5 employees, starting from the third employee.
+8. Repeat this process, but this time with the /employees/deactivated endpoint.
 
-Expected result:
-
-HTTP response: 200 (OK)
-The response should return at most 10 deactivated employees starting from the first one (offset 0).
-
-Test: UpdateEmployee
-
-Description: Validates that the 'updateEmployee' method renews the details of an existing employee.
-
-Steps:
-Ensure there is an employee that can be updated, and get their ID.
-Input valid 'UpdateEmployeeDto' data.
-Send a 'PATCH' request to the /employees/{id}/update endpoint with the data.
-Check if the employee has been updated by sending a 'GET' request to /employees endpoint.
-
-Expected result:
-
-HTTP response: 200 (OK)
-Response contains the data of the newly updated employee.
-
-Test: DeactivateEmployee
-
-Description: Validates that the 'deactivateEmployee' method sucessfully deactivates an active employee.
+Test: deactivation of an employee moves them to the 'deactivated' section
 
 Steps:
-Ensure there is an employee that can be deactivated and get their ID.
-Send a 'PATCH' request to the /employees/{id}/deactivate endpoint.
-Check if the employee has been deactivated by sending a 'GET' request to the /employees/deactivated endpoint.
+1. Ensure there are no deactivated employees.
+2. Ensure there are two active employees in the database and say they have the IDs 'id1' and 'id2'.
+3. Send a 'PATCH' request to /employees/{id}/deactivate endpoint (NOTE: replace {id} with id1).
+4. Send a 'GET' request to the /employees endpoint and verify it contains only the employee with 'id2'.
+5. Send a 'GET' request to the /employees/deactivated endpoint it contains only the employee with 'id1'.
+
+Test: updating an existing employee works properly
+
+Steps:
+1. Ensure there is at least one employee in the database and get their ID.
+2. Send a 'PATCH' request to the /employees/{id}/update with "name: 'Mladen Boskov'" in JSON body. (NOTE: replace {id} with the actual employee ID.)
+3. Send a 'GET' request to the /employees endpoint to ensure the data has been updated.
 
 Expected result:
 
 HTTP response: 200 (OK)
 The response contains the data of the deactivated employee.
+
+Test: updating an existing employee with incorrect data fails
+
+Steps:
+1. Ensure there is at least one employee in the database and get their ID.
+2. Send a 'PATCH' request to the /employees/{id}/update with "position:'Mladen Boskov'" in JSON body. (NOTE: replace {id} with the actual employee ID.)
+
+Expected result:
+HTTP response: 500
+
+
