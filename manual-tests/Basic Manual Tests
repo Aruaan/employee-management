@@ -1,0 +1,74 @@
+Basic Manual Tests
+
+Test: AddEmployee
+
+Description: Validates that the 'addEmployee' method successfully adds a new employee to the database.
+
+Steps:
+
+Input valid 'CreateEmployeeDto' data.
+Ensure the new employee doesn't already exist.
+Send a 'POST' request to /employees with 'CreateEmployeeDto'.
+Check if the employee has been added by sending a 'GET' request to the same endpoint.
+Expected Result:
+
+HTTP response: 201 (Created).
+Response contains details of the new employee.
+
+Test: FindAll
+
+Description: Validates that the 'findAll' Method returns a paginated list of all employees with the default limit and offset values.
+
+Steps:
+
+If there are employees in the database, send a 'GET' request to the /employees endpoint without query parameters.
+Check if the employees returned are in the correct order.
+
+Expected result:
+
+HTTP response: 200 (OK)
+The response contains a list of employees and their number does not exceed the limit (10) and start from the first employee (offset 0)
+
+
+Test FindDeactivated
+
+Description: Validates that the 'findDeactivated' method returns a paginated list of all deactivated employees with the default limit and offset values.
+
+Steps:
+
+If there are deactivated employees in the database, send a 'GET' request to the /employees/deactivated endpoint without query parameters.
+Check if the employees returned are actually deactivated.
+
+Expected result:
+
+HTTP response: 200 (OK)
+The response should return at most 10 deactivated employees starting from the first one (offset 0).
+
+Test: UpdateEmployee
+
+Description: Validates that the 'updateEmployee' method renews the details of an existing employee.
+
+Steps:
+Ensure there is an employee that can be updated, and get their ID.
+Input valid 'UpdateEmployeeDto' data.
+Send a 'PATCH' request to the /employees/{id}/update endpoint with the data.
+Check if the employee has been updated by sending a 'GET' request to /employees endpoint.
+
+Expected result:
+
+HTTP response: 200 (OK)
+Response contains the data of the newly updated employee.
+
+Test: DeactivateEmployee
+
+Description: Validates that the 'deactivateEmployee' method sucessfully deactivates an active employee.
+
+Steps:
+Ensure there is an employee that can be deactivated and get their ID.
+Send a 'PATCH' request to the /employees/{id}/deactivate endpoint.
+Check if the employee has been deactivated by sending a 'GET' request to the /employees/deactivated endpoint.
+
+Expected result:
+
+HTTP response: 200 (OK)
+The response contains the data of the deactivated employee.
